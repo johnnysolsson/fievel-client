@@ -22,12 +22,6 @@ jobs:
           npm ci
           npm run build
 
-      - name: Derive public key from secret and print fingerprint
-        run: |
-          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > id_ci && chmod 600 id_ci
-          ssh-keygen -lf id_ci
-          ssh-keygen -y -f id_ci | ssh-keygen -lf -  # fingerprint of the derived public key
-
       - name: Deploy via rsync
         uses: burnett01/rsync-deployments@7.1.0
         with:
