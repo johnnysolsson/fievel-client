@@ -24,6 +24,7 @@ jobs:
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.INLEED_HOST }}
+          port: ${{ secrets.INLEED_PORT }}
           username: ${{ secrets.INLEED_USER }}
           key: ${{ secrets.INLEED_SSH_KEY }}
           source: "dist/*"
