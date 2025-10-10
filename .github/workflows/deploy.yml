@@ -22,6 +22,21 @@ jobs:
           npm ci
           npm run build
 
+      - name: SSH sanity check (-vvv)
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ci
+          chmod 600 ~/.ssh/id_ci
+
+          # Safer than turning checks off:
+          ssh-keyscan -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+          # Try a no-op command with full verbosity and ONLY this identity
+          ssh -vvv -o IdentitiesOnly=yes -i ~/.ssh/id_ci -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            'echo "SSH OK on $(hostname)"'
+
       - name: Deploy via rsync
         uses: burnett01/rsync-deployments@7.1.0
         with:
@@ -32,3 +47,8 @@ jobs:
           remote_user: ${{ secrets.SSH_USER }}
           remote_key: ${{ secrets.SSH_KEY }}
           remote_port: ${{ secrets.SSH_PORT }}
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
