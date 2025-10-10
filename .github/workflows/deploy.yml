@@ -1,31 +1,59 @@
 name: Deploy Frontend to Inleed
+
 on:
   push:
     branches: [ main ]
+    # Optional: limit to frontend-relevant files
+    # paths:
+    #   - "src/**"
+    #   - "public/**"
+    #   - "package.json"
+    #   - "package-lock.json"
+    #   - "vite.config.*"
+    #   - ".github/workflows/deploy-frontend.yml"
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: npm
 
-      - name: Install and build
+      - name: SSH connectivity test (temporary)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.INLEED_HOST }}
+          username: ${{ secrets.INLEED_USER }}
+          key: ${{ secrets.INLEED_SSH_KEY }}
+          port: ${{ secrets.INLEED_SSH_PORT }}
+          script: |
+            echo "Connected via SSH ✅"
+            whoami
+            hostname
+            pwd
+
+      - name: Install & Build
         run: |
           npm ci
           npm run build
 
-      - name: Deploy via SSH
+      - name: Upload build to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.INLEED_HOST }}
-          port: ${{ secrets.INLEED_PORT }}
           username: ${{ secrets.INLEED_USER }}
           key: ${{ secrets.INLEED_SSH_KEY }}
+          port: ${{ secrets.INLEED_SSH_PORT }}
           source: "dist/*"
           target: "/home/fiveforyou/domains/fievel.54u.se/public_html"
+          overwrite: true
+          # Tip: If you want a clean deploy, set rm: true
+          # BUT be sure your .htaccess is in the uploaded files
+          # rm: true
