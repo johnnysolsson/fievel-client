@@ -22,32 +22,11 @@ jobs:
           npm ci
           npm run build
 
-      - name: SSH sanity check (agent, fingerprint)
+      - name: Derive public key from secret and print fingerprint
         run: |
-          set -euo pipefail
-
-          eval "$(ssh-agent -s)"
-          # Add the private key from secret to the agent
-          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" | ssh-add - <<<"${{ secrets.SSH_PRIVATE_KEY }}" >/dev/null 2>&1 || {
-            echo "ssh-add failed (bad key format or passphrase-protected key without pass)"; exit 1;
-          }
-
-          # Show the key fingerprint (safe to print)
-          ssh-add -l
-
-          # Trust host key (safer than disabling)
-          ssh-keyscan -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
-
-          # Attempt a no-op command
-          ssh -vvv -o IdentitiesOnly=yes -p "${{ secrets.SSH_PORT }}" \
-              "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
-              'echo "SSH OK on $(hostname)"'
-
-    - name: Derive public key from secret and print fingerprint
-      run: |
-        printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > id_ci && chmod 600 id_ci
-        ssh-keygen -lf id_ci
-        ssh-keygen -y -f id_ci | ssh-keygen -lf -  # fingerprint of the derived public key
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > id_ci && chmod 600 id_ci
+          ssh-keygen -lf id_ci
+          ssh-keygen -y -f id_ci | ssh-keygen -lf -  # fingerprint of the derived public key
 
       - name: Deploy via rsync
         uses: burnett01/rsync-deployments@7.1.0
