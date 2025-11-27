@@ -1,59 +1,127 @@
-name: Deploy Frontend to Inleed
+name: Deploy Frontend (React → Inleed)
 
 on:
   push:
-    branches: [ main ]
-    # Optional: limit to frontend-relevant files
-    # paths:
-    #   - "src/**"
-    #   - "public/**"
-    #   - "package.json"
-    #   - "package-lock.json"
-    #   - "vite.config.*"
-    #   - ".github/workflows/deploy-frontend.yml"
+    branches: [ "main" ]
+    paths:
+      - "package.json"
+      - "package-lock.json"
+      - "yarn.lock"
+      - "pnpm-lock.yaml"
+      - "vite.config.*"
+      - "webpack.*"
+      - "public/**"
+      - "src/**"
+      - ".github/workflows/deploy-frontend.yml"
+  workflow_dispatch: {}   # allow manual runs from the Actions tab
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-deploy-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  build:
+    name: Build frontend
     runs-on: ubuntu-latest
-
+    env:
+      # Change these if you use yarn or pnpm
+      NODE_VERSION: "20"
+      PACKAGE_MANAGER: "npm"
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: npm
+          node-version: ${{ env.NODE_VERSION }}
+          cache: ${{ env.PACKAGE_MANAGER }}
 
-      - name: SSH connectivity test (temporary)
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.INLEED_HOST }}
-          username: ${{ secrets.INLEED_USER }}
-          key: ${{ secrets.INLEED_SSH_KEY }}
-          port: ${{ secrets.INLEED_SSH_PORT }}
-          script: |
-            echo "Connected via SSH ✅"
-            whoami
-            hostname
-            pwd
+      - name: Install dependencies
+        if: env.PACKAGE_MANAGER == 'npm'
+        run: npm ci
 
-      - name: Install & Build
+      - name: Install dependencies (yarn)
+        if: env.PACKAGE_MANAGER == 'yarn'
+        run: yarn install --frozen-lockfile
+
+      - name: Install dependencies (pnpm)
+        if: env.PACKAGE_MANAGER == 'pnpm'
         run: |
-          npm ci
-          npm run build
+          npm -g i pnpm
+          pnpm i --frozen-lockfile
 
-      - name: Upload build to server
-        uses: appleboy/scp-action@v0.1.7
+      - name: Build
+        run: |
+          if [ "${{ env.PACKAGE_MANAGER }}" = "npm" ]; then npm run build;
+          elif [ "${{ env.PACKAGE_MANAGER }}" = "yarn" ]; then yarn build;
+          else pnpm build; fi
+
+      - name: Detect build directory
+        id: detect
+        run: |
+          if [ -d "build" ]; then echo "dir=build" >> $GITHUB_OUTPUT;
+          elif [ -d "dist" ]; then echo "dir=dist" >> $GITHUB_OUTPUT;
+          else echo "No build output (expected ./build or ./dist)"; exit 1; fi
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
-          host: ${{ secrets.INLEED_HOST }}
-          username: ${{ secrets.INLEED_USER }}
-          key: ${{ secrets.INLEED_SSH_KEY }}
-          port: ${{ secrets.INLEED_SSH_PORT }}
-          source: "dist/*"
-          target: "/home/fiveforyou/domains/fievel.54u.se/public_html"
-          overwrite: true
-          # Tip: If you want a clean deploy, set rm: true
-          # BUT be sure your .htaccess is in the uploaded files
-          # rm: true
+          name: frontend-build
+          path: ${{ steps.detect.outputs.dir }}/
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy to Inleed
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: production
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: ./artifact
+
+      - name: Prepare SSH key & known_hosts
+        env:
+          INLEED_SSH_KEY: ${{ secrets.INLEED_SSH_KEY }}
+          INLEED_HOST: ${{ secrets.INLEED_HOST }}
+          INLEED_PORT: ${{ secrets.INLEED_PORT }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf "%s" "$INLEED_SSH_KEY" > ~/.ssh/inleed_key
+          chmod 600 ~/.ssh/inleed_key
+          # trust the server host key to avoid interactive prompt
+          ssh-keyscan -p "$INLEED_PORT" "$INLEED_HOST" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Rsync build to docroot
+        env:
+          INLEED_HOST: ${{ secrets.INLEED_HOST }}
+          INLEED_PORT: ${{ secrets.INLEED_PORT }}
+          INLEED_USER: ${{ secrets.INLEED_USER }}
+          DEST_PATH: ${{ vars.DEST_PATH }}
+        run: |
+          set -euo pipefail
+          # detect output inside artifact
+          if [ -d "artifact/build" ]; then OUT="artifact/build";
+          elif [ -d "artifact/dist" ]; then OUT="artifact/dist";
+          else echo "Artifact missing build/dist"; ls -la artifact; exit 1; fi
+
+          # Deploy static assets via rsync over SSH
+          rsync -az --delete \
+            --chmod=D755,F644 \
+            --exclude='.htaccess' \
+            -e "ssh -i ~/.ssh/inleed_key -p $INLEED_PORT" \
+            "$OUT"/ "$INLEED_USER@$INLEED_HOST:$DEST_PATH/"
+
+          # If your .htaccess lives in the build output and you want to deploy it,
+          # comment the --exclude above and optionally push it explicitly:
+          # scp -i ~/.ssh/inleed_key -P "$INLEED_PORT" "$OUT/.htaccess" \
+          #   "$INLEED_USER@$INLEED_HOST:$DEST_PATH/.htaccess" || true
