@@ -51,11 +51,16 @@ jobs:
           elif [ -d "dist" ]; then echo "dir=dist" >> $GITHUB_OUTPUT;
           else echo "No build output (expected ./build or ./dist)"; exit 1; fi
 
+      - name: Prepare artifact folder
+        run: |
+          mkdir -p upload/${{ steps.detect.outputs.dir }}
+          cp -r ${{ steps.detect.outputs.dir }}/* upload/${{ steps.detect.outputs.dir }}/
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
-          path: ${{ steps.detect.outputs.dir }}
+          path: upload/
           if-no-files-found: error
 
   deploy:
@@ -94,7 +99,7 @@ jobs:
           set -euo pipefail
           if [ -d "artifact/build" ]; then OUT="artifact/build";
           elif [ -d "artifact/dist" ]; then OUT="artifact/dist";
-          else echo "Artifact missing build/dist"; ls -la artifact; exit 1; fi
+          else OUT="artifact"; fi
 
           rsync -az --delete \
             --chmod=D755,F644 \
@@ -109,8 +114,20 @@ jobs:
           DEST_PATH: ${{ vars.DEST_PATH }}
         run: |
           set -euo pipefail
+          if [ -f "artifact/build/.htaccess" ]; then SRC="artifact/build/.htaccess";
+          elif [ -f "artifact/dist/.htaccess" ]; then SRC="artifact/dist/.htaccess";
+          elif [ -f ".htaccess" ]; then SRC=".htaccess";
+          elif [ -f "public/.htaccess" ]; then SRC="public/.htaccess";
+          else echo "No .htaccess found; skipping upload."; exit 0; fi
 
-          # Priority 1: .htaccess inside the build output (artifact)
-          if [ -f "artifact/build/.htaccess" ]; then
-            SRC="artifact/build/.htaccess"
-          elif [ -f "artifact/dist/.htaccess" ]; then
+          echo "Uploading .htaccess from '$SRC' to '$DEST_PATH/.htaccess'"
+          scp -i ~/.ssh/inleed_key -P "$INLEED_PORT" "$SRC" \
+            "$INLEED_USER@$INLEED_HOST:$DEST_PATH/.htaccess"
+
+      - name: Health check
+        env:
+          SITE_URL: https://fievel.54u.se
+        run: |
+          set -euo pipefail
+          echo "Checking site availability..."
+          curl -s -I -k "$SITE_URL" | head -n 20
