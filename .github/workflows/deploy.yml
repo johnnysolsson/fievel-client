@@ -55,7 +55,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
-          path: ${{ steps.detect.outputs.dir }}/
+          path: ${{ steps.detect.outputs.dir }}
           if-no-files-found: error
 
   deploy:
