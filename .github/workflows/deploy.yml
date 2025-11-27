@@ -12,7 +12,7 @@ on:
       - "webpack.*"
       - "public/**"
       - "src/**"
-      - ".github/workflows/deploy-frontend.yml"
+      - ".github/workflows/deploy.yml"
   workflow_dispatch: {}   # allow manual runs from the Actions tab
 
 permissions:
