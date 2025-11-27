@@ -130,4 +130,3 @@ jobs:
         run: |
           set -euo pipefail
           echo "Checking site availability..."
-          curl -s -I -k "$SITE_URL" | head -n 20
