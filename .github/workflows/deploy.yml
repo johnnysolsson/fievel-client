@@ -1,3 +1,4 @@
+
 name: Deploy Frontend (React → Inleed)
 
 on:
@@ -6,14 +7,12 @@ on:
     paths:
       - "package.json"
       - "package-lock.json"
-      - "yarn.lock"
-      - "pnpm-lock.yaml"
       - "vite.config.*"
       - "webpack.*"
       - "public/**"
       - "src/**"
       - ".github/workflows/deploy.yml"
-  workflow_dispatch: {}   # allow manual runs from the Actions tab
+  workflow_dispatch: {}
 
 permissions:
   contents: read
@@ -27,9 +26,7 @@ jobs:
     name: Build frontend
     runs-on: ubuntu-latest
     env:
-      # Change these if you use yarn or pnpm
       NODE_VERSION: "20"
-      PACKAGE_MANAGER: "npm"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -38,27 +35,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: ${{ env.PACKAGE_MANAGER }}
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
 
       - name: Install dependencies
-        if: env.PACKAGE_MANAGER == 'npm'
         run: npm ci
 
-      - name: Install dependencies (yarn)
-        if: env.PACKAGE_MANAGER == 'yarn'
-        run: yarn install --frozen-lockfile
-
-      - name: Install dependencies (pnpm)
-        if: env.PACKAGE_MANAGER == 'pnpm'
-        run: |
-          npm -g i pnpm
-          pnpm i --frozen-lockfile
-
       - name: Build
-        run: |
-          if [ "${{ env.PACKAGE_MANAGER }}" = "npm" ]; then npm run build;
-          elif [ "${{ env.PACKAGE_MANAGER }}" = "yarn" ]; then yarn build;
-          else pnpm build; fi
+        run: npm run build
 
       - name: Detect build directory
         id: detect
@@ -97,7 +81,6 @@ jobs:
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           printf "%s" "$INLEED_SSH_KEY" > ~/.ssh/inleed_key
           chmod 600 ~/.ssh/inleed_key
-          # trust the server host key to avoid interactive prompt
           ssh-keyscan -p "$INLEED_PORT" "$INLEED_HOST" >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
@@ -109,19 +92,25 @@ jobs:
           DEST_PATH: ${{ vars.DEST_PATH }}
         run: |
           set -euo pipefail
-          # detect output inside artifact
           if [ -d "artifact/build" ]; then OUT="artifact/build";
           elif [ -d "artifact/dist" ]; then OUT="artifact/dist";
           else echo "Artifact missing build/dist"; ls -la artifact; exit 1; fi
 
-          # Deploy static assets via rsync over SSH
           rsync -az --delete \
             --chmod=D755,F644 \
-            --exclude='.htaccess' \
             -e "ssh -i ~/.ssh/inleed_key -p $INLEED_PORT" \
             "$OUT"/ "$INLEED_USER@$INLEED_HOST:$DEST_PATH/"
 
-          # If your .htaccess lives in the build output and you want to deploy it,
-          # comment the --exclude above and optionally push it explicitly:
-          # scp -i ~/.ssh/inleed_key -P "$INLEED_PORT" "$OUT/.htaccess" \
-          #   "$INLEED_USER@$INLEED_HOST:$DEST_PATH/.htaccess" || true
+      - name: Upload .htaccess explicitly if found
+        env:
+          INLEED_HOST: ${{ secrets.INLEED_HOST }}
+          INLEED_PORT: ${{ secrets.INLEED_PORT }}
+          INLEED_USER: ${{ secrets.INLEED_USER }}
+          DEST_PATH: ${{ vars.DEST_PATH }}
+        run: |
+          set -euo pipefail
+
+          # Priority 1: .htaccess inside the build output (artifact)
+          if [ -f "artifact/build/.htaccess" ]; then
+            SRC="artifact/build/.htaccess"
+          elif [ -f "artifact/dist/.htaccess" ]; then
