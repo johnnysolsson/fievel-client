@@ -1,15 +1,20 @@
-export default function App() {
+
+import React from 'react';
+import { Card } from './components/Card';
+import { CardGrid } from './components/CardGrid';
+
+export const App: React.FC = () => {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex items-center justify-center">
-      <div className="p-8 rounded-2xl shadow-lg bg-white">
-        <h1 className="text-3xl font-bold">Fievel Client</h1>
-        <p className="mt-2 text-slate-600">
-          React + Vite + TypeScript + Tailwind is ready. Now what?
-        </p>
-        <button className="mt-4 px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700">
-          Tailwind Button
-        </button>
-      </div>
+    <div className="p-6 max-w-6xl mx-auto space-y-6">
+      <h1 className="text-2xl font-bold">Fievel Cards</h1>
+
+      <Card title="Standalone Card" variant="default">
+        This is a single card in the app.
+      </Card>
+
+      <CardGrid />
     </div>
   );
-}
+};
+
+export default App;
