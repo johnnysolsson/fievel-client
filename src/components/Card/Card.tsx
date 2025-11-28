@@ -1,99 +1,88 @@
 
-import React, { ReactNode } from 'react';
-
-export type CardVariant = 'default' | 'outlined' | 'elevated';
+import React from 'react';
 
 export interface CardProps {
-  title?: string;
-  children?: ReactNode;
-  className?: string;
-  onClick?: () => void;
-  variant?: CardVariant;
+  name: string;
+  role: string;
   imageSrc?: string;
-  imageAlt?: string;
   tags?: string[];
   onEdit?: () => void;
   onArchive?: () => void;
 }
 
 export const Card: React.FC<CardProps> = ({
-  title,
-  children,
-  className,
-  onClick,
-  variant = 'default',
+  name,
+  role,
   imageSrc,
-  imageAlt,
-  tags,
+  tags = [],
   onEdit,
   onArchive,
 }) => {
-  const base = 'rounded-xl bg-white border p-4 transition';
-  const variants: Record<CardVariant, string> = {
-    default: 'border-gray-200 shadow-sm hover:shadow-md',
-    outlined: 'border-gray-300 shadow-none',
-    elevated: 'border-transparent shadow-lg',
-  };
-
-  const clickable = onClick
-    ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500'
-    : '';
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!onClick) return;
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onClick();
-    }
-  };
-
   return (
-    <div
-      className={`${base} ${variants[variant]} ${clickable} ${className || ''}`}
-      onClick={onClick}
-      onKeyDown={handleKeyDown}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      aria-label={title}
-    >
-      {imageSrc && (
-        <img
-          src={imageSrc}
-          alt={imageAlt || title || 'Card image'}
-          className="w-full h-40 object-cover rounded-lg mb-3"
-        />
-      )}
-      {title && <h3 className="text-lg font-semibold mb-2">{title}</h3>}
-      <div>{children}</div>
-
-      {tags && tags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-3">
-          {tags.slice(0, 10).map((tag: string, index: number) => (
-            <span
-              key={index}
-              className="bg-gray-100 text-gray-700 text-xs font-medium px-2 py-1 rounded-full"
-            >
-              {tag}
-            </span>
-          ))}
+    <div className="bg-transparent flex flex-col gap-6 pb-6 border-b border-gray-300">
+      <div className="flex items-start gap-6 mt-6">
+        {/* Left column: Profile */}
+        <div className="flex flex-col items-center w-32">
+          {imageSrc && (
+            <img
+              src={imageSrc}
+              alt={name}
+              className="w-28 h-28 rounded-full object-cover"
+            />
+          )}
+          <h3 className="text-sm mt-3 text-center font-sans">{name}</h3>
+          <p className="text-xs text-center font-serif">{role}</p>
         </div>
-      )}
-      {/* Admin Buttons */}
 
-      <div className="flex gap-3 mt-4">
-        <button
-          type="button"
-          onClick={onEdit}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >Ändra</button>
-    <button
-      type="button"
-      onClick={onArchive}
-      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
-    >Arkivera</button>
-  </div>
+        {/* Right column: Nyckelord + Tags + Buttons */}
+        <div className="flex-1">
+          {tags.length > 0 && (
+            <>
+              <p className="text-gray-700 text-sm mb-3 font-serif">Nyckelord</p>
+              <div className="flex flex-wrap gap-3 mb-6 tags">
+                {tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded-md font-serif"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
 
+          {/* Buttons */}
+          {(onEdit || onArchive) && (
+            <div className="flex gap-4 mt-8">
+              {onEdit && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit();
+                  }}
+                  className="px-6 py-2 text-xl font-light text-white bg-[#6B1E1E] rounded-3xl hover:bg-[#5A1818] focus:outline-none focus:ring-2 focus:ring-[#6B1E1E]"
+                >
+                  Ändra
+                </button>
+              )}
+              {onArchive && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onArchive();
+                  }}
+                  className="px-6 py-2 text-xl font-medium text-[#6B1E1E] bg-white border border-[#6B1E1E] rounded-3xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#6B1E1E]"
+                >
+                  Pausa
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
-
