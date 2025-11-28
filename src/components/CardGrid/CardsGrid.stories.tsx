@@ -14,7 +14,7 @@ export default meta;
 
 type Story = StoryObj<typeof Card>;
 
-export const Default: Story = {
+export const ProfileCardsGrid: Story = {
   render: () => (
     <div className="min-h-screen bg-[#f7faf9]">
       <div className="max-w-6xl mx-auto px-8 py-10">

@@ -16,7 +16,7 @@ export default meta;
 
 type Story = StoryObj<typeof Card>;
 
-export const AdminCard: Story = {
+export const ProfileCard: Story = {
   args: {
     name: 'Linda Ruhméin',
     role: 'UX Designer',
