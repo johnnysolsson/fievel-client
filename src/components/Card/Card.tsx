@@ -30,7 +30,7 @@ export const Card: React.FC<CardProps> = ({
               className="w-28 h-28 rounded-full object-cover"
             />
           )}
-          <h3 className="text-sm mt-3 text-center font-sans">{name}</h3>
+          <h3 className="text-sm mt-3 text-center font-serif mb-1">{name}</h3>
           <p className="text-xs text-center font-serif">{role}</p>
         </div>
 
