@@ -62,7 +62,7 @@ export const Card: React.FC<CardProps> = ({
                     e.stopPropagation();
                     onEdit();
                   }}
-                  className="px-6 py-2 text-xl font-light text-white bg-[#6B1E1E] rounded-3xl hover:bg-[#5A1818] focus:outline-none focus:ring-2 focus:ring-[#6B1E1E]"
+                  className="px-6 py-2 text-xl font-light text-white bg-brand-800 rounded-3xl hover:bg-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-800"
                 >
                   Ändra
                 </button>
@@ -74,7 +74,7 @@ export const Card: React.FC<CardProps> = ({
                     e.stopPropagation();
                     onArchive();
                   }}
-                  className="px-6 py-2 text-xl font-medium text-[#6B1E1E] bg-white border border-[#6B1E1E] rounded-3xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#6B1E1E]"
+                  className="px-6 py-2 text-xl font-medium text-brand-800 bg-white border border-brand-800 rounded-3xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-800"
                 >
                   Pausa
                 </button>
