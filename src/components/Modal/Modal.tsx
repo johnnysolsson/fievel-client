@@ -1,103 +1,134 @@
-
-import React from 'react';
+import React, { useState } from "react";
 
 export interface ModalProps {
   name: string;
+  role: string;
+  imageSrc?: string;
   tags?: string[];
-  onCreate?: () => void;
-  onDelete?: () => void;
-  onSave?: () => void;
-  onCancel?: () => void;
+  onCancel: () => void;
+  onSave: (profile: { name: string; role: string; imageSrc?: string; tags: string[] }) => void;
 }
 
-export const Modal: React.FC<ModalProps> = ({
+const Modal: React.FC<ModalProps> = ({
   name,
+  role,
+  imageSrc = "",
   tags = [],
-  onCreate,
-  onDelete,
-  onSave,
   onCancel,
+  onSave,
 }) => {
-  return (
-    <div className="bg-transparent flex flex-col gap-6 pb-6 border-b border-gray-300">
-      {/* Top */}
-      {/* <div className="flex items-start gap-6 mt-6"> */}
-        <div className="flex flex-col items-center w-40">
-          <h2 className="text-lg mt-3 text-left font-bold font-serif mb-1">{name}</h2>
-        </div>
-      {/* </div> */}
+  const [profileName, setProfileName] = useState(name);
+  const [profileRole, setProfileRole] = useState(role);
+  const [profileImage, setProfileImage] = useState(imageSrc);
+  const [modalTags, setModalTags] = useState(tags);
+  const [newTag, setNewTag] = useState("");
 
-      {/* Tags */}
-      {(onCreate || onDelete) && (
-      <div className="flex items-start gap-6 mt-6">
-        <div className="flex flex-wrap gap-3 mb-6 tags">
-          {tags.map((tag, index) => (
-            <span
-              key={index}
-              className="bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded-md font-serif"
-            >
-              {tag} 
-              {onDelete && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete();
-                  }}
-                  className="px-2 py-1 text-xl font-bold rounded-3xl hover:text-[#FFFFFF] hover:bg-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-800"
-                >
-                  -
-                </button>
-              )}
-            </span>
-          ))}
-          <span className="bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded-md font-serif">
-            {onCreate && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onCreate();
-                }}
-                className="px-2 py-1 text-xl font-bold rounded-3xl hover:text-[#FFFFFF] hover:bg-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-800"
-              >
-                +
-              </button>
-            )}
+  const addTag = () => {
+    if (newTag.trim() && !modalTags.includes(newTag.trim())) {
+      setModalTags([...modalTags, newTag.trim()]);
+      setNewTag("");
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setModalTags(modalTags.filter(tag => tag !== tagToRemove));
+  };
+
+  return (
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={onCancel}
+    >
+      <div
+        className="bg-white rounded-lg p-8 w-1/2 max-w-screen-md min-w-[350px] relative"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="relative mb-4">
+          <input
+            type="text"
+            value={profileName}
+            onChange={e => setProfileName(e.target.value)}
+            className="text-2xl w-full border border-brand-800 bg-brand-50 px-10 py-2 rounded font-bold focus:outline-none focus:border-brand-800 transition"
+            placeholder="Redigera profilnamn"
+          />
+          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-brand-800 pointer-events-none">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+              <path d="M15.232 5.232l3.536 3.536M4 20h4.243l9.9-9.9a2 2 0 0 0 0-2.828l-2.415-2.415a2 2 0 0 0-2.828 0l-9.9 9.9V20z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </span>
         </div>
-      </div>
-      )}
-      
-      {/* ModalButtons */}
-      {(onSave || onCancel) && (
-        <div className="flex gap-4 mt-8">
-          {onSave && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onSave();
-              }}
-              className="px-6 py-2 text-xl font-light text-white bg-brand-800 rounded-3xl hover:bg-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-800"
+        <input
+          type="text"
+          value={profileRole}
+          onChange={e => setProfileRole(e.target.value)}
+          className="w-full border border-gray-300 px-4 py-2 rounded mb-4"
+          placeholder="Roll"
+        />
+        <input
+          type="text"
+          value={profileImage}
+          onChange={e => setProfileImage(e.target.value)}
+          className="w-full border border-gray-300 px-4 py-2 rounded mb-4"
+          placeholder="Bild-URL (valfritt)"
+        />
+        <p className="text-gray-700 text-sm mb-3 font-serif">Nyckelord</p>
+        <div className="flex flex-wrap gap-3 mb-6 tags">
+          {modalTags.map((tag, index) => (
+            <span
+              key={index}
+              className="bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded-md font-serif flex items-center"
             >
-              Spara
-            </button>
-          )}
-          {onCancel && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onCancel();
-              }}
-              className="px-6 py-2 text-xl font-medium text-brand-800 bg-white border border-brand-800 rounded-3xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-800"
-            >
-              Avbryt
-            </button>
-          )}
+              {tag}
+              <button
+                className="ml-2 text-red-500"
+                onClick={() => removeTag(tag)}
+                type="button"
+              >
+                ×
+              </button>
+            </span>
+          ))}
         </div>
-      )}
+        <div className="flex gap-2 mb-4">
+          <input
+            type="text"
+            value={newTag}
+            onChange={e => setNewTag(e.target.value)}
+            className="border px-2 py-1 rounded"
+            placeholder="Lägg till ny tagg"
+          />
+          <button
+            type="button"
+            onClick={addTag}
+            className="bg-brand-800 text-white px-4 py-1 rounded"
+          >
+            Lägg till
+          </button>
+        </div>
+        <button
+          type="button"
+          onClick={() =>
+            onSave({
+              name: profileName,
+              role: profileRole,
+              imageSrc: profileImage,
+              tags: modalTags,
+            })
+          }
+          className="bg-brand-800 text-white px-4 py-2 rounded mt-4"
+        >
+          Spara
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+        >
+          Stäng
+        </button>
+      </div>
     </div>
   );
 };
+
+export default Modal;

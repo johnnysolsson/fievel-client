@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from './components/Card/Card';
-import { CardGrid } from './components/CardGrid';
+import CardGrid from './components/CardGrid/CardGrid';
 
 export const App: React.FC = () => {
   return (

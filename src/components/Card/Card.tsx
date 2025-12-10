@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useState } from "react";
+import Modal from "../Modal/Modal";
 
 export interface CardProps {
   name: string;
@@ -18,6 +19,7 @@ export const Card: React.FC<CardProps> = ({
   onEdit,
   onArchive,
 }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <div className="bg-transparent flex flex-col gap-6 pb-6 border-b border-gray-300">
       <div className="flex items-start gap-6 mt-6">
@@ -52,37 +54,51 @@ export const Card: React.FC<CardProps> = ({
             </>
           )}
 
-          {/* Buttons */}
-          {(onEdit || onArchive) && (
-            <div className="flex gap-4 mt-8">
-              {onEdit && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEdit();
-                  }}
-                  className="px-6 py-2 text-xl font-light text-white bg-brand-800 rounded-3xl hover:bg-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-800"
-                >
-                  Ändra
-                </button>
-              )}
-              {onArchive && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onArchive();
-                  }}
-                  className="px-6 py-2 text-xl font-medium text-brand-800 bg-white border border-brand-800 rounded-3xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-800"
-                >
-                  Pausa
-                </button>
-              )}
-            </div>
-          )}
+{/* Buttons */}
+{(onEdit || onArchive) && (
+  <div className="flex gap-4 mt-8">
+    {onEdit && (
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsModalOpen(true);
+        }}
+        className="px-6 py-2 text-xl font-light text-white bg-brand-800 rounded-3xl hover:bg-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-800"
+      >
+        Ändra
+      </button>
+    )}
+    {onArchive && (
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onArchive();
+        }}
+        className="px-6 py-2 text-xl font-medium text-brand-800 bg-white border border-brand-800 rounded-3xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-800"
+      >
+        Pausa
+      </button>
+    )}
+  </div>
+)}
+{isModalOpen && (
+  <Modal
+    name={name}
+    role={role}
+    tags={tags}
+    onCancel={() => setIsModalOpen(false)}
+    onSave={() => {
+      // handle save logic here
+      setIsModalOpen(false);
+    }}
+  />
+)}
         </div>
       </div>
     </div>
   );
 };
+
+export default Card;
