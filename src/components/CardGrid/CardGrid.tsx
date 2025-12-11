@@ -1,4 +1,3 @@
-// CardGrid.tsx
 import React, { useState } from "react";
 import Modal from "../Modal/Modal";
 import Card from "../Card/Card";
@@ -70,8 +69,9 @@ const CardGrid: React.FC = () => {
   return (
     <div>
       <button
-        className="bg-brand-800 text-white px-4 py-2 rounded mb-4"
+        type="button"
         onClick={handleAddProfile}
+        className="px-6 py-2 text-xl font-light text-white bg-brand-800 rounded-3xl hover:bg-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-800"
       >
         Lägg till anställd
       </button>

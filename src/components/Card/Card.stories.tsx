@@ -1,4 +1,3 @@
-
 import type { Meta, StoryObj } from '@storybook/react';
 import { Card } from './Card';
 
@@ -20,7 +19,7 @@ export const ProfileCard: Story = {
   args: {
     name: 'Linda Ruhméin',
     role: 'UX Designer',
-    imageSrc: 'https://54u.se/wp-content/uploads/2025/08/Linda_Ruhmen-300x300.jpg', // Replace with real image
+    imageSrc: 'https://54u.se/wp-content/uploads/2025/08/Linda_Ruhmen-300x300.jpg',
     tags: [
       'UX Designer', 'UI Designer', 'Product Designer', 'SCRUM', 'Designsystem',
       'Workshops', 'Design thinking', 'WCAG', 'Accessibility', 'Figma'

@@ -163,25 +163,39 @@ const Modal: React.FC<ModalProps> = ({ name, role, imageSrc, tags, onSave, onCan
             className="border px-2 py-1 rounded"
             placeholder="Lägg till ny tagg"
           />
-          <button type="button" onClick={addTag} className="bg-brand-800 text-white px-4 py-1 rounded">
-            Lägg till
+
+          <button
+            type="button"
+            onClick={addTag}
+            className="px-6 py-2 text-xl font-light text-white bg-brand-800 rounded-3xl hover:bg-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-800"
+          >
+            Lägg till 
           </button>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            onSave({ name: profileName, role: profileRole, imageSrc: profileImage, tags: modalTags });
-          }}
-          className="bg-brand-800 text-white px-4 py-2 rounded mt-4"
-        >
-          Spara
-        </button>
+        <div className="mt-3">
+          <button
+            type="button"
+            onClick={() => {
+              onSave({ name: profileName, role: profileRole, imageSrc: profileImage, tags: modalTags });
+            }}
+            className="px-6 py-2 text-xl font-light text-white bg-brand-800 rounded-3xl hover:bg-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-800"
+          >
+            Spara
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-6 py-2 ml-4 text-xl font-medium text-brand-800 bg-white border border-brand-800 rounded-3xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-800"
+          >
+            Avbryt
+          </button>
+        </div>
         <button
           type="button"
           onClick={onCancel}
           className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
         >
-          Stäng
+          X
         </button>
       </div>
     </div>

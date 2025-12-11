@@ -11,7 +11,6 @@ export interface CardProps {
   onResume?: () => void;
 }
 
-// Helper to get initials from name
 const getInitials = (name: string) =>
   name
     .split(" ")

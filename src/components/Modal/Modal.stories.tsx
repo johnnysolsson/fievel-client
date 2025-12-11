@@ -1,4 +1,3 @@
-// Modal.stories.tsx
 import React, { useState } from "react";
 import Modal from "./Modal";
 
