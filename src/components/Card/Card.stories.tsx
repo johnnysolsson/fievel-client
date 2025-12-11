@@ -9,7 +9,7 @@ const meta: Meta<typeof Card> = {
   parameters: { layout: 'centered' },
   argTypes: {
     onEdit: { action: 'edit' },
-    onArchive: { action: 'archive' },
+    onPause: { action: 'archive' },
   },
 };
 export default meta;
@@ -26,6 +26,6 @@ export const ProfileCard: Story = {
       'Workshops', 'Design thinking', 'WCAG', 'Accessibility', 'Figma'
     ],
     onEdit: () => {},
-    onArchive: () => {},
+    onPause: () => {},
   },
 };
