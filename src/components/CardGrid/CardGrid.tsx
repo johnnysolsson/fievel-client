@@ -1,3 +1,4 @@
+// CardGrid.tsx
 import React, { useState } from "react";
 import Modal from "../Modal/Modal";
 import Card from "../Card/Card";
@@ -5,35 +6,61 @@ import Card from "../Card/Card";
 interface Profile {
   name: string;
   role: string;
-  imageSrc?: string;
+  imageSrc: string;
   tags: string[];
 }
 
 const CardGrid: React.FC = () => {
   const [profiles, setProfiles] = useState<Profile[]>([
     {
-      name: "Anna Andersson",
+      name: "Johnny Olsson",
+      role: "Frontend Developer",
+      imageSrc: "https://54u.se/wp-content/uploads/2021/12/Johnny_02-300x300.jpg",
+      tags: [
+        'Frontendutvecklare', 'Backendutvecklare', 'Fullstack', 'DevOps', 'Scrum Master', 'Agile Coach'
+      ],
+    },    
+    {
+      name: "Linda Ruhmén",
       role: "Frontend Developer",
       imageSrc: "https://54u.se/wp-content/uploads/2025/08/Linda_Ruhmen-300x300.jpg",
-      tags: ["React", "Design"],
+      tags: [
+        'UX Designer', 'UI Designer', 'Product Designer', 'SCRUM', 'Designsystem',
+        'Workshops', 'Design thinking', 'WCAG', 'Tillgänglighet', 'Figma', 'Prototyper',
+        'Google Analytics', 'Optimizely', 'ChatGPT', 'Lovable', 'Figma', 'Prototyper',
+        'Google Analytics', 'Optimizely', 'ChatGPT', 'Lovable'
+      ],
     },
     {
-      name: "Erik Eriksson",
-      role: "Backend Developer",
-      imageSrc: "https://54u.se/wp-content/uploads/2025/08/Linda_Ruhmen-300x300.jpg",
-      tags: ["Node.js", "API"],
+      name: "Morgan Söderqvist",
+      role: "UX Designer",
+      imageSrc: "https://54u.se/wp-content/uploads/2024/04/morgan_s.png",
+      tags: ['UX', 'Product Owner', 'Product Designer'],
     },
   ]);
   const [showModal, setShowModal] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const handleAddProfile = () => {
-    console.log("Button clicked");
+    setEditingIndex(null);
+    setShowModal(true);
+  };
+
+  const handleEditProfile = (index: number) => {
+    setEditingIndex(index);
     setShowModal(true);
   };
 
   const handleSaveProfile = (profile: Profile) => {
-    setProfiles([...profiles, profile]);
+    if (editingIndex === null) {
+      setProfiles(prev => [...prev, profile]);
+    } else {
+      setProfiles(prev =>
+        prev.map((p, idx) => (idx === editingIndex ? profile : p))
+      );
+    }
     setShowModal(false);
+    setEditingIndex(null);
   };
 
   return (
@@ -42,9 +69,9 @@ const CardGrid: React.FC = () => {
         className="bg-brand-800 text-white px-4 py-2 rounded mb-4"
         onClick={handleAddProfile}
       >
-        Lägg till ans   tälld
+        Lägg till anställd
       </button>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 w-full">
         {profiles.map((profile, idx) => (
           <Card
             key={idx}
@@ -52,16 +79,21 @@ const CardGrid: React.FC = () => {
             role={profile.role}
             imageSrc={profile.imageSrc}
             tags={profile.tags}
+            onEdit={() => handleEditProfile(idx)}
           />
         ))}
       </div>
       {showModal && (
         <Modal
-          name=""
-          role=""
-          tags={[]}
-          imageSrc=""
-          onCancel={() => setShowModal(false)}
+          key={editingIndex !== null ? editingIndex : "new"}
+          name={editingIndex !== null ? profiles[editingIndex].name : ""}
+          role={editingIndex !== null ? profiles[editingIndex].role : ""}
+          tags={editingIndex !== null ? profiles[editingIndex].tags : []}
+          imageSrc={editingIndex !== null ? profiles[editingIndex].imageSrc || "" : ""}
+          onCancel={() => {
+            setShowModal(false);
+            setEditingIndex(null);
+          }}
           onSave={handleSaveProfile}
         />
       )}
