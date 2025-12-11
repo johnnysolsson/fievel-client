@@ -51,6 +51,10 @@ const CardGrid: React.FC = () => {
     setShowModal(true);
   };
 
+  const handlePauseProfile = (index: number) => {
+    setEditingIndex(index);
+  };
+
   const handleSaveProfile = (profile: Profile) => {
     if (editingIndex === null) {
       setProfiles(prev => [...prev, profile]);
@@ -80,12 +84,12 @@ const CardGrid: React.FC = () => {
             imageSrc={profile.imageSrc}
             tags={profile.tags}
             onEdit={() => handleEditProfile(idx)}
+            onPause={() => handlePauseProfile(idx)}
           />
         ))}
       </div>
       {showModal && (
         <Modal
-          key={editingIndex !== null ? editingIndex : "new"}
           name={editingIndex !== null ? profiles[editingIndex].name : ""}
           role={editingIndex !== null ? profiles[editingIndex].role : ""}
           tags={editingIndex !== null ? profiles[editingIndex].tags : []}

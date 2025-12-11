@@ -9,7 +9,6 @@ interface ModalProps {
   onCancel: () => void;
 }
 
-// EditableTag component for inline editing
 const EditableTag: React.FC<{
   tag: string;
   onUpdate: (newTag: string) => void;
@@ -81,19 +80,34 @@ const Modal: React.FC<ModalProps> = ({ name, role, imageSrc, tags, onSave, onCan
     fileInputRef.current?.click();
   };
 
+  const handleRemoveImage = () => {
+    setProfileImage("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded shadow-lg relative w-96">
 
       <div className="flex flex-col items-center mb-4">
         {profileImage ? (
-          <img
-            src={profileImage}
-            alt="Profilbild"
-            className="w-28 h-28 rounded-full object-cover mb-2 cursor-pointer"
-            onClick={handleImageClick}
-            title="Byt bild"
-          />
+          <div className="relative group w-28 h-28 mb-2">
+            <img
+              src={profileImage}
+              alt="Profilbild"
+              className="w-28 h-28 rounded-full object-cover cursor-pointer"
+              onClick={handleImageClick}
+              title="Byt bild"
+            />
+            <div
+              className="absolute inset-0 bg-black bg-opacity-60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              onClick={handleRemoveImage}
+            >
+              <span className="text-white text-sm font-semibold">Ta bort bild</span>
+            </div>
+          </div>
         ) : (
           <div
             className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center mb-2 cursor-pointer text-gray-500 text-center"
@@ -156,7 +170,6 @@ const Modal: React.FC<ModalProps> = ({ name, role, imageSrc, tags, onSave, onCan
         <button
           type="button"
           onClick={() => {
-            console.log("Saving profile:", { name: profileName, role: profileRole, imageSrc, tags: modalTags });
             onSave({ name: profileName, role: profileRole, imageSrc: profileImage, tags: modalTags });
           }}
           className="bg-brand-800 text-white px-4 py-2 rounded mt-4"
