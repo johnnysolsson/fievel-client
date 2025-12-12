@@ -8,7 +8,7 @@ const meta: Meta<typeof Card> = {
   parameters: { layout: 'centered' },
   argTypes: {
     onEdit: { action: 'edit' },
-    onPause: { action: 'archive' },
+    onTogglePause: { action: 'togglePause' },
   },
 };
 export default meta;
@@ -25,6 +25,6 @@ export const ProfileCard: Story = {
       'Workshops', 'Design thinking', 'WCAG', 'Accessibility', 'Figma'
     ],
     onEdit: () => {},
-    onPause: () => {},
+    onTogglePause: () => {},
   },
 };
