@@ -1,0 +1,49 @@
+import { Meta } from "@storybook/blocks";
+
+<Meta title="Components/Modal/Documentation" />
+
+# Modal Component
+
+The `Modal` component provides a dialog interface for creating and editing user profiles. It handles form inputs for name, role, image, and tags.
+
+## Props
+
+The component accepts the following props via `ModalProps`:
+
+| Prop | Type | Description |
+| :--- | :--- | :--- |
+| `name` | `string` | Initial value for the name input. |
+| `role` | `string` | Initial value for the role input. |
+| `imageSrc` | `string` | Initial URL for the profile image. |
+| `tags` | `string[]` | Initial array of tags. |
+| `onSave` | `(profile: ProfileData) => void` | Callback triggered when the "Spara" button is clicked. Returns the updated profile data. |
+| `onCancel` | `() => void` | Callback triggered when the "Avbryt" or "X" button is clicked. |
+
+## Features
+
+- **Image Upload**: Allows users to upload a profile image from their device.
+- **Image Removal**: Provides an option to remove the current profile image.
+- **Tag Management**:
+    - **Add**: Users can type a new tag and add it to the list.
+    - **Remove**: Users can remove existing tags by clicking the "×" button.
+    - **Edit**: Users can click on an existing tag to edit its text inline.
+- **Form Validation**: Prevents adding duplicate tags (case-sensitive).
+
+## Usage
+
+```tsx
+import Modal from "./Modal";
+
+<Modal
+  name="John Doe"
+  role="Designer"
+  imageSrc=""
+  tags={["UI", "UX"]}
+  onSave={(updatedProfile) => {
+    console.log("Saved:", updatedProfile);
+  }}
+  onCancel={() => {
+    console.log("Cancelled");
+  }}
+/>
+```

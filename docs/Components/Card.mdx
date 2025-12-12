@@ -1,0 +1,51 @@
+import { Meta } from "@storybook/blocks";
+
+<Meta title="Components/Card/Documentation" />
+
+# Card Component
+
+The `Card` component displays a user's profile information, including their image, name, role, and tags. It supports an "active" and "paused" state, with different visual presentations for each.
+
+## Props
+
+The component accepts the following props via `CardProps`:
+
+| Prop | Type | Description |
+| :--- | :--- | :--- |
+| `name` | `string` | The full name of the user. |
+| `role` | `string` | The user's job title or role. |
+| `imageSrc` | `string` | URL to the user's profile image. |
+| `tags` | `string[]` | Array of tags (skills, keywords) associated with the user. |
+| `isPaused` | `boolean` | (Optional) If `true`, the card is shown in a collapsed, grayed-out state. Defaults to `false`. |
+| `onEdit` | `() => void` | (Optional) Callback function triggered when the "Ändra" button is clicked. |
+| `onTogglePause` | `() => void` | (Optional) Callback function triggered when the "Pausa" or "Aktivera" button is clicked. |
+
+## States
+
+### Active State
+- Displays the full profile card.
+- Shows the profile image, name, role, and all tags.
+- Provides "Ändra" (Edit) and "Pausa" (Pause) buttons.
+
+### Paused State
+- Displays a collapsed, compact version of the card.
+- The card is grayed out (opacity reduced) to indicate inactivity.
+- Shows a small version of the profile image and name.
+- Displays a "Pausad" label.
+- Provides an "Aktivera" (Activate) button to restore the active state.
+
+## Usage
+
+```tsx
+import Card from "./Card";
+
+<Card
+  name="Jane Doe"
+  role="Software Engineer"
+  imageSrc="/path/to/image.jpg"
+  tags={["React", "TypeScript", "Node.js"]}
+  isPaused={false}
+  onEdit={() => handleEdit()}
+  onTogglePause={() => handleTogglePause()}
+/>
+```

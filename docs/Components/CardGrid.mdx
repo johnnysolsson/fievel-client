@@ -1,0 +1,48 @@
+import { Meta } from "@storybook/blocks";
+
+<Meta title="Components/CardGrid/Documentation" />
+
+# CardGrid Component
+
+The `CardGrid` component is the main container for displaying a collection of `Card` components. It manages the state of all profiles and handles the logic for adding, editing, and pausing profiles.
+
+## Features
+
+- **State Management**: Maintains the list of `Profile` objects as the single source of truth.
+- **Grid Layout**: Renders `Card` components in a responsive grid layout.
+- **Sorting**: Automatically sorts profiles so that "Paused" cards are moved to the bottom of the list.
+- **Modal Integration**: Manages the visibility and state of the `Modal` component for adding and editing profiles.
+
+## Data Model
+
+It uses the `Profile` interface defined in `src/types/types.ts`:
+
+```typescript
+interface Profile {
+  name: string;
+  role: string;
+  imageSrc: string;
+  tags: string[];
+  isPaused?: boolean;
+}
+```
+
+## Usage
+
+```tsx
+import CardGrid from "./CardGrid";
+
+const App = () => {
+  return (
+    <div className="p-6">
+      <CardGrid />
+    </div>
+  );
+};
+```
+
+## Interactions
+
+1.  **Add Profile**: Clicking "Lägg till anställd" opens an empty `Modal` to create a new profile.
+2.  **Edit Profile**: Clicking "Ändra" on a card opens the `Modal` pre-filled with that profile's data.
+3.  **Pause/Activate**: Clicking "Pausa" or "Aktivera" toggles the `isPaused` state of a profile and triggers a re-sort of the grid.
